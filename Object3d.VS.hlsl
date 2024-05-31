@@ -1,3 +1,7 @@
+//struct TrancformationMatrix{
+//    float32_t4x4 WVP;
+//};
+
 struct VertexShaderOutput{
     float32_t4 position : SV_POSITION;
 };
