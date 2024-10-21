@@ -21,11 +21,13 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include <fstream>
 #include <sstream>
-#define DIRECTINPUT_VERSION  0x0800
-#include <dinput.h>
+//#define DIRECTINPUT_VERSION  0x0800
+//#include <dinput.h>
+//
+//#pragma comment(lib, "dinput8.lib")
+//#pragma comment(lib, "dxguid.lib")
 
-#pragma comment(lib, "dinput8.lib")
-#pragma comment(lib, "dxguid.lib")
+#include "Input.h"
 
 
 
@@ -725,6 +727,10 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+	//汎用機能
+	Input* input = nullptr;
+
+
 	WNDCLASS wc{};
 	//ウインドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
@@ -955,28 +961,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 
+	//入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
 
 
-	//resultはhr w.はwc.
-	//05_02_11P
-	//DirectInputの初期化
-	IDirectInput8* directInput = nullptr;
-	hr = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
-	assert(SUCCEEDED(hr));
+	////resultはhr w.はwc.
+	////05_02_11P
+	////DirectInputの初期化
+	//IDirectInput8* directInput = nullptr;
+	//hr = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	//assert(SUCCEEDED(hr));
 
-	//キーボードデバイスの生成
-	IDirectInputDevice8* keyboard = nullptr;
-	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(hr));
+	////キーボードデバイスの生成
+	//IDirectInputDevice8* keyboard = nullptr;
+	//hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	//assert(SUCCEEDED(hr));
 
-	//入力データ形式のリセット
-	hr = keyboard->SetDataFormat(&c_dfDIKeyboard); //標準形式
-	assert(SUCCEEDED(hr));
+	////入力データ形式のリセット
+	//hr = keyboard->SetDataFormat(&c_dfDIKeyboard); //標準形式
+	//assert(SUCCEEDED(hr));
 
-	//排他制御レベルのリセット
-	hr = keyboard->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(hr));
+	////排他制御レベルのリセット
+	//hr = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//assert(SUCCEEDED(hr));
 
 
 
@@ -1381,6 +1389,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	//ウインドウの×ボタンが押されるまでループ
+	//メインループ
 	while (msg.message != WM_QUIT) {
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 		//Windowにメッセージが来てたら最優先で処理させる
@@ -1583,6 +1592,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		CoUninitialize();
 	}
+
+	//各種解放
+	
+	//入力解放
+	delete input;
 	
 
 	//出力ウインドウへの文字出力
