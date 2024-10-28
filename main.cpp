@@ -1404,10 +1404,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			input->Update();
 
 			//数字の0キーが押されていたら
-			/*if (key[DIK_0])
+			if (input->TriggerKey(DIK_0))
 			{
 				OutputDebugStringA("Hit 0\n");
-			}*/
+			}
 
 			//ゲームの処理
 			ImGui_ImplDX12_NewFrame();
