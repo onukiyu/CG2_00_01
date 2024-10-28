@@ -1400,20 +1400,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		else
 		{
-			//AL3_5_2_p16
-			//キーボード情報の取得位置
-			keyboard->Acquire();
-
-			//全キーの入力状態を取得する
-			BYTE key[256] = {};
-			keyboard->GetDeviceState(sizeof(key), key);
+			//入力の更新
+			input->Update();
 
 			//数字の0キーが押されていたら
-			if (key[DIK_0])
+			/*if (key[DIK_0])
 			{
-				OutputDebugStringA("Hit 0\n"); 
-			}
-
+				OutputDebugStringA("Hit 0\n");
+			}*/
 
 			//ゲームの処理
 			ImGui_ImplDX12_NewFrame();
