@@ -1,7 +1,7 @@
 #pragma warning(push)
 #pragma warning(disable:4023)
 #include <Windows.h>
-#include <cstdint>
+//#include <cstdint> int32_t
 #include <string>
 #include <format>
 #include <d3d12.h>
@@ -14,7 +14,7 @@
 #pragma warning(pop)
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxcompiler.lib")
-#include "externals/imgui/imgui.h"
+
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
@@ -28,6 +28,8 @@
 //#pragma comment(lib, "dxguid.lib")
 
 #include "Input.h"
+
+#include "WinApp.h"
 
 
 
@@ -730,44 +732,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//汎用機能
 	Input* input = nullptr;
 
+	//ポインタ
+	WinApp* winApp = nullptr;
 
-	WNDCLASS wc{};
-	//ウインドウプロシージャ
-	wc.lpfnWndProc = WindowProc;
-	//ウインドウクラス名(なんでも良い)
-	wc.lpszClassName = L"CG2WindowClass";
-	//インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
-	//カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
-	//ウインドウクラスを登録する
-	RegisterClass(&wc);
-
-	//クライアント領域のサイズ
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
-
-
-	//ウインドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0, 0, kClientWidth, kClientHeight };
-
-
-	//クライアント領域を元に実際のサイズにwrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName, //利用するクラス名
-		L"CG2", //タイトルバーの文字(なんでもいい)
-		WS_OVERLAPPEDWINDOW, //よく見るウィンドウスタイル
-		CW_USEDEFAULT, //表示X座標(Windowsに任せる)
-		CW_USEDEFAULT, //表示y座標(WindowsOSに任せる)
-		wrc.right - wrc.left, //ウィンドウ横幅
-		wrc.bottom - wrc.top, //ウィンドウ縦幅
-		nullptr, //親ウィンドウハンドル
-		nullptr, //メニューハンドル
-		wc.hInstance, //インスタンスハンドル
-		nullptr); //オプション
+	//WindowsAPIの初期化
+	winApp = new WinApp();
+	winApp->Intialize();
 
 #ifdef _DEBUG
 	ID3D12Debug1* debugController = nullptr;
@@ -782,8 +752,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif // DEBUG
 
 
-	//ウインドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
+	
 
 	//DXGIファクトリーの生成
 	IDXGIFactory7* dxgiFactory = nullptr;
@@ -1591,6 +1560,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 	//入力解放
 	delete input;
+
+	//WindowsAPI解放
+	delete winApp;
 	
 
 	//出力ウインドウへの文字出力
