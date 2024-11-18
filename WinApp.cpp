@@ -2,7 +2,7 @@
 
 
 //#include <wrl.h>
-#include <cstdint>
+
 
 #include "externals/imgui/imgui.h"
 
@@ -33,7 +33,7 @@ void WinApp::Intialize()
 {
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	WNDCLASS wc{};
+	//WNDCLASS wc{};
 	//ウインドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
 	//ウインドウクラス名(なんでも良い)
@@ -46,9 +46,9 @@ void WinApp::Intialize()
 	//ウインドウクラスを登録する
 	RegisterClass(&wc);
 
-	//クライアント領域のサイズ
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
+	////クライアント領域のサイズ
+	//const int32_t kClientWidth = 1280;
+	//const int32_t kClientHeight = 720;
 
 
 	//ウインドウサイズを表す構造体にクライアント領域を入れる
@@ -58,7 +58,7 @@ void WinApp::Intialize()
 	//クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
-	HWND hwnd = CreateWindow(
+	/*HWND*/ hwnd = CreateWindow(
 		wc.lpszClassName, //利用するクラス名
 		L"CG2", //タイトルバーの文字(なんでもいい)
 		WS_OVERLAPPEDWINDOW, //よく見るウィンドウスタイル
