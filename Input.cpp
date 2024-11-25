@@ -10,14 +10,17 @@
 
 //using namespace Microsoft::WRL;
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
+	//借りてきたWinAppのインスタンスを記録
+	this->winApp = winApp; //03_04 7ページ
+
 	HRESULT hr;
 	//resultはhr w.はwc.
 	//05_02_11P
 	//DirectInputの初期化
 	ComPtr<IDirectInput8> directInput = nullptr;
-	hr = DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	hr = DirectInput8Create(winApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
 	//キーボードデバイスの生成
@@ -30,7 +33,7 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	assert(SUCCEEDED(hr));
 
 	//排他制御レベルのセット
-	hr = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	hr = keyboard->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
 }
 

@@ -938,7 +938,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	//入力の初期化
 	input = new Input();
-	input->Initialize(winApp->GetHInstance(), winApp->GetHwnd());
+	input->Initialize(winApp);
 
 
 	////resultはhr w.はwc.
@@ -1566,9 +1566,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 	//入力解放
 	delete input;
+	
+	//WindowsAPIの終了処理
+	winApp->Finalize();
 
 	//WindowsAPI解放
 	delete winApp;
+	winApp = nullptr;
+
+	
 	
 
 	//出力ウインドウへの文字出力
@@ -1606,7 +1612,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #ifdef _DEBUG
 	debugController->Release();
 #endif // _DEBUG
-	CloseWindow(winApp->GetHwnd());
+	//CloseWindow(winApp->GetHwnd());
 	
 
 	//リソースリークチェック

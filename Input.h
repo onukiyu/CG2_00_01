@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <wrl.h>
+#include "WinApp.h"
 
 #define DIRECTINPUT_VERSION  0x0800 //DirectInputのバージョン指定
 #include <dinput.h>
@@ -14,11 +15,13 @@ public:
 
 public://メンバ変数
 	//初期化
-	void Initialize(HINSTANCE hInstance, HWND hwnd);
+	void Initialize(WinApp* winApp);
 	//更新
 	void Update();
 
 private: //メンバ変数
 	//キーボードのデバイス
 	ComPtr <IDirectInputDevice8> keyboard;
+	// WindowsAPI
+	WinApp* winApp = nullptr;
 };
