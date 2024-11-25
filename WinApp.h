@@ -23,6 +23,9 @@ public: //メンバ関数
 	//終了
 	void Finalize();
 
+	// メッセージの処理
+	bool ProcessMessage();
+
 	// getter
 	HWND GetHwnd() const { return hwnd; }
 
@@ -36,4 +39,5 @@ private:
 
 	//ウィンドウクラスの設定
 	WNDCLASS wc{};
+
 };
