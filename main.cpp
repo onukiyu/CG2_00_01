@@ -469,8 +469,17 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
+Transform transform{ {1.0F, 1.0F, 1.0F}, {0.0F, 0.0F, 0.0F},{0.0F, 0.0F, 0.0F} };
 
+// コールバック関数のプロトタイプ宣言
+typedef void (*Callback)(int result);
 
+// 判定を行うコールバック関数
+void judge_result(int result) {
+
+	transform.rotate.x += 0.03f;
+
+}
 
 
 
@@ -500,7 +509,7 @@ std::wstring ConvertString(const std::string& str) {
 	if (str.empty()) {
 		return std::wstring();
 	}
-
+	
 	auto sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(&str[0]), static_cast<int>(str.size()), NULL, 0);
 	if (sizeNeeded == 0) {
 		return std::wstring();
@@ -1281,7 +1290,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	*wvpData = MakeIdentity4x4();
 
 	//Transform変数を作る
-	Transform transform{ {1.0F, 1.0F, 1.0F}, {0.0F, 0.0F, 0.0F},{0.0F, 0.0F, 0.0F} };
+	
 
 	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -5.0f} };
 
@@ -1390,12 +1399,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				OutputDebugStringA("Hit 0\n");
 			}*/
 
+		Callback callback = judge_result;
+
+		callback(0);
+
 			//ゲームの処理
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		transform.rotate.y += 0.03f;
+		
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 		Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
