@@ -717,9 +717,9 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 
-	//HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 	//汎用機能
-	/*Input* input = nullptr;*/
+	Input* input = nullptr;
 
 	//ポインタ
 	WinApp* winApp = nullptr;
@@ -738,8 +738,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	////入力の初期化
-	//input = new Input();
-	//input->Initialize(winApp);
+	input = new Input();
+	input->Initialize(winApp);
 
 
 	////resultはhr w.はwc.
@@ -1168,7 +1168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	
 		//入力の更新
-		//input->Update();
+		input->Update();
 
 			//数字の0キーが押されていたら
 			/*if (key[DIK_0])
@@ -1206,8 +1206,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//ImGui::End();
 
+		// GE3_04_03
+		// 描画前処理
+		dxComon->PreDraw();
 
-
+		// 移植
 		////これから書き込むバックバッファのインデックスを取得
 		//UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 		//	
@@ -1225,6 +1228,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		////TransitionBarrierを張る
 		//commandList->ResourceBarrier(1, &barrier);
+		// 
+		// 移植
+		
+		
 		//
 		////ImGuiの内部コマンドを生成する
 		//ImGui::Render();
@@ -1260,15 +1267,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		////指定した深度で画面全体をクリアする
 		//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
+		//移植
 
 		////描画用のDescriptorHeapの設定
 		//ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
+		
+		
+
 		//commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 		//commandList->RSSetViewports(1, &viewport);//
 		//commandList->RSSetScissorRects(1, &scissorRect);//
-		////
+		
+		//移植
+
 		//commandList->SetGraphicsRootSignature(rootSignature);
 		//commandList->SetPipelineState(graphicsPipelineState);//
 		//commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//
@@ -1347,8 +1359,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//assert(SUCCEEDED(hr));
 		//hr = commandList->Reset(commandAllocator, nullptr);
 		//assert(SUCCEEDED(hr));
-
-			
+		
+		dxComon->PostDraw();
+		
 	}
 
 	//CoUninitialize();

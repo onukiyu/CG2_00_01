@@ -398,21 +398,24 @@ void DirectXCommon::RenderTargetViewInitialize()
 	////RTVを2つ作るのでディスクリプタを2つ用意
 	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 
-	//裏表の二つ分
-	for (uint32_t i = 0; i < 2; ++i)
-	{
-		//作る場所をこちらで指定してあげる必要がある
-		rtvHandles[i] = rtvStartHandle;
-		device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
+	////裏表の二つ分
+	//for (uint32_t i = 0; i < 2; ++i)
+	//{
+	//	//作る場所をこちらで指定してあげる必要がある
+	//	rtvHandles[i] = rtvStartHandle;
+	//	device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
 
-	}
+	//}
 
-	////まず1つ目を作る。1つ目最初のところに作る。
-	//
-	////2つ目のディスクリプタハンドルを得る（自力で）
-	//rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	////2つ目を作る
-	//device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
+	//まず1つ目を作る。1つ目最初のところに作る。
+	//作る場所をこちらで指定してあげる必要がある
+	rtvHandles[0] = rtvStartHandle;
+	device->CreateRenderTargetView(swapChainResources[0].Get(), &rtvDesc, rtvHandles[0]);
+	
+	//2つ目のディスクリプタハンドルを得る（自力で）
+	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	//2つ目を作る
+	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 
 }
 
@@ -432,16 +435,10 @@ void DirectXCommon::DepthStencilViewInitialize()
 //フェンスの生成
 void DirectXCommon::FenceInitialize()
 {
-
-	//初期値0でFenceを作る
-	uint64_t fenceValue = 0;
 	HRESULT hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
-	//FenceのSignalを待つためのイベントを作成する
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
-
 }
 
 //ビューポート矩形の初期化
@@ -503,5 +500,106 @@ void DirectXCommon::ImGuiInitialize()
 		srvDescriptorHeap.Get(),
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+}
+
+void DirectXCommon::PreDraw()
+{
+	// バックバッファの番号取得
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
+	// リソースバリアで書き込み可に変更
+	//今回のバリアはTransition
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	//Noneにしておく
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	//バリアを張る対象のリソース。現在のバックバッファに対して行なう
+	barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+	//遷移前（現在）のResourceState
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	//遷移後のResourceState
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//TransitionBarrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+
+	// 描画先のRTVとDSVを指定する
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+
+	// 画面全体の色をクリア
+	//指定した色で画面全体をクリアする
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBの順
+	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
+	// 画面全体の深度をクリア
+	//指定した深度で画面全体をクリアする
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	
+	// SRV用のデスクリプタヒープを指定する
+	//描画用のDescriptorHeapの設定
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get()};
+	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+	// ビューポート領域の設定
+	commandList->RSSetViewports(1, &viewport);//
+	
+	// シザー矩形
+	commandList->RSSetScissorRects(1, &scissorRect);
+}
+
+void DirectXCommon::PostDraw()
+{
+	// バックバッファの番号取得
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
+	// リソースバリアで表示状態に変更
+	
+	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
+	//今回はRenderTargetからPresentにする
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	//TransitionBarrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+
+	// グラフィックコマンドをクローズ
+	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
+	HRESULT hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+
+	// GPUコマンドの実行
+	// GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList.Get()};
+	commandQueue->ExecuteCommandLists(1, commandLists);
+
+	// GPU画面の交換を通知
+	//GPUとOSに両面の交換を行うように通知する
+	swapChain->Present(1, 0);
+
+	// Fenceの値を更新
+	fenceValue++;
+
+	// コマンドキューにシグナルを送る
+	//GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
+	commandQueue->Signal(fence.Get(), fenceValue);
+
+	// コマンド完了待ち
+	//Fenceの値が指定したSignal値にたどり着いてるか確認する
+	//GetCompletedValueの初期値はFence作成時に渡した初期値
+	if (fence->GetCompletedValue() < fenceValue)
+	{
+		//指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		//イベント待つ
+		WaitForSingleObject(fenceEvent, INFINITE);
+	}
+
+	// コマンドアロケーターのリセット
+	hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+		
+
+	// コマンドリストのリセット
+	 hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	 assert(SUCCEEDED(hr));
 
 }

@@ -40,6 +40,11 @@ public: // メンバ
 	// ImGuiの初期化
 	void ImGuiInitialize();
 
+	//GE3_04_03
+	// 描画前処理
+	void PreDraw();
+	// 描画後処理
+	void PostDraw();
 
 	// SRVの指定番号のCPUデスクリプタハンドルを取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
@@ -142,5 +147,14 @@ private:
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
 	//現時点でincludeはしないが、includeに対応するための設定を行っておく
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
+
+	//TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
+	// フェンス値
+	UINT64 fenceValue = 0;
+	//FenceのSignalを待つためのイベントを作成する
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	
+
 };
 
