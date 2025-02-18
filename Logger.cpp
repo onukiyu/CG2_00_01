@@ -12,8 +12,8 @@ namespace Logger {
 		OutputDebugStringA(message.c_str());
 	}
 
-	/*void Log(const std::wstring& message)
+	void Log(const std::wstring& message)
 	{
-		OutputDebugStringA(ConvertString(message).c_str());
-	}*/
+		OutputDebugStringW((message).c_str());
+	}
 }
