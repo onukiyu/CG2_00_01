@@ -1,7 +1,7 @@
 #include "StringUtility.h"
 #include <stringapiset.h>
 
-std::wstring StringUtility::ConverString(const std::string& str)
+std::wstring StringUtility::ConvertString(const std::string& str)
 {
 	if (str.empty()) {
 		return std::wstring();
@@ -17,7 +17,7 @@ std::wstring StringUtility::ConverString(const std::string& str)
 }
 
 
-std::string StringUtility::ConverString(const std::wstring& str)
+std::string StringUtility::ConvertString(const std::wstring& str)
 {
 	if (str.empty()) {
 		return std::string();

@@ -3,9 +3,9 @@
 namespace StringUtility
 {
 	// stringをwstringに変換する
-	std::wstring ConverString(const std::string& str);
+	std::wstring ConvertString(const std::string& str);
 
 	// wstringをstringに変換する
-	std::string ConverString(const std::wstring& str);
+	std::string ConvertString(const std::wstring& str);
 };
 
