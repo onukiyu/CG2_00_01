@@ -5,6 +5,7 @@
 #include "WinApp.h"
 #include "array"
 #include <dxcapi.h>
+#include <string>
 #include "externals/DirectXTex/DirectXTex.h"
 
 
@@ -46,6 +47,9 @@ public: // メンバ
 	// 描画後処理
 	void PostDraw();
 
+	//終了
+	void Finalize();
+
 	// SRVの指定番号のCPUデスクリプタハンドルを取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
 	// SRVの指定番号のGPUデスクリプタハンドルを取得する
@@ -55,19 +59,36 @@ public: // メンバ
 
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);*/
 
-	//IDxcBlob* CompileShader(
-	//	//CompilerするShederファイルへのパス
-	//	const std::wstring& filePath,
-	//	//Compilerに使用するProfile
-	//	const wchar_t* profile,
-	//	//初期化で生成したものを3つ
-	//	IDxcUtils* dxcUtils,
-	//	IDxcCompiler3* dxcCompiler,
-	//	IDxcIncludeHandler* includeHandler);
+	
 
-		
+	// getter
+	ID3D12Device* GetDevice() const { return device.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
+	
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
+		//CompilerするShederファイルへのパス
+		const std::wstring& filePath,
+		//Compilerに使用するProfile
+		const wchar_t* profile
+		);
+
+
+	//CG2_02_00 P42lll
+	//リソース生成関数
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
+	//テクスチャリソースの生成
+	////2.DirectX12のTextureResourceを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
+
+	//テクスチャデータの転送
+	void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages);
+
+	// テクスチャファイルの読み込み
+	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
 private:
-	IDXGIFactory7* dxgiFactory = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
 
 	
 
@@ -99,7 +120,7 @@ private:
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 
 	// WindowsAPI
-	WinApp* winApp = nullptr;
+	WinApp* winApp;
 	
 	
 
@@ -113,6 +134,8 @@ private:
 	//ID3D12DescriptorHeap* srvDescriptorHeap;
 	//DSV用のヒープでデイスクリプタの数は1。DSVはShader内で触るものではないので、Shade Visibleはfalse
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps;
 
 	// デスクリプタヒープを生成する
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
@@ -143,10 +166,10 @@ private:
 	D3D12_RECT scissorRect{};
 
 	//dxCompilerを初期化
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler;
 	//現時点でincludeはしないが、includeに対応するための設定を行っておく
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler;
 
 	//TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
@@ -155,6 +178,26 @@ private:
 	//FenceのSignalを待つためのイベントを作成する
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	
+	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter;
+	
+#ifdef _DEBUG
+	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController;
+#endif // DEBUG
 
+	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource;
+
+	Microsoft::WRL::ComPtr<IDxcResult> shaderResult;
+
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError;
+
+	Microsoft::WRL::ComPtr <IDxcBlob> shaderBlob;
+
+	Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists;
 };
 
