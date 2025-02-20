@@ -628,8 +628,9 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+	D3DResourceLeakChecker d3DResourceLeakChecker;
 
-	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	HRESULT hr;// = CoInitializeEx(0, COINIT_MULTITHREADED);
 	//汎用機能
 	Input* input = nullptr;
 
@@ -654,8 +655,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	input->Initialize(winApp);
 
 
-	D3DResourceLeakChecker* d3DResourceLeakChecker = nullptr;
-	d3DResourceLeakChecker = new D3DResourceLeakChecker();
+	
+	//d3DResourceLeakChecker = new D3DResourceLeakChecker();
 
 
 	//PSO
@@ -1166,6 +1167,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//出力ウインドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
+	//delete d3DResourceLeakChecker;
+
+
+
 
 	//DirectX解放
 	delete dxComon;
@@ -1210,7 +1215,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//CloseWindow(winApp->GetHwnd());
 	
 
-	d3DResourceLeakChecker->~D3DResourceLeakChecker();
+	//d3DResourceLeakChecker->~D3DResourceLeakChecker();
 
 	return 0;
 }
