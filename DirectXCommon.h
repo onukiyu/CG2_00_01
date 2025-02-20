@@ -7,6 +7,7 @@
 #include <dxcapi.h>
 #include <string>
 #include "externals/DirectXTex/DirectXTex.h"
+#include<chrono>
 
 
 class DirectXCommon
@@ -199,5 +200,13 @@ private:
 	Microsoft::WRL::ComPtr <IDxcBlob> shaderBlob;
 
 	Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists;
+
+	// GE3_04_05
+	// FPS固定初期化
+	void InitializeFixFPS();
+	// FPS固定更新
+	void UpdateFixFPS();
+	// 記録時間（FPS固定用）
+	std::chrono::steady_clock::time_point reference_;
 };
 

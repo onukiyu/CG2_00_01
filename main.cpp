@@ -1171,8 +1171,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete dxComon;
 
 
-	
-
 	//CloseHandle(fenceEvent);// dxCommon用も作るFinalize
 	//fence->Release();
 	//rtvDescriptorHeap->Release();

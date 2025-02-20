@@ -1,4 +1,5 @@
 #include "WinApp.h"
+#pragma comment(lib, "winmm.lib")
 
 
 //#include <wrl.h>
@@ -31,6 +32,9 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 void WinApp::Intialize()
 {
+	//システムタイマーの分解能を上げる
+	timeBeginPeriod(1);
+
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	//WNDCLASS wc{};
